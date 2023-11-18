@@ -1,43 +1,48 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Scanner;
-
 
 public class Main {
-    public static void main(String[] args) {
+    private static Connection connection; // Declare the Connection as a class variable
 
-        // Database connection parameters
+    public static void main(String[] args) throws SQLException {
+
+        Main main = new Main();
+
         String url = "jdbc:postgresql://localhost:5432/mydatabase";
         String user = "username";
         String password = "password";
 
+        main.openConnection(url, user, password);
+
+        CommandMenu menu = new CommandMenu();
+        menu.displayMenu(connection);
+
+        main.closeConnection();
+
+    }
+
+    public void openConnection(String url, String user, String password) {
         try {
             // Establish a database connection
-            Connection connection = DriverManager.getConnection(url, user, password);
+            connection = DriverManager.getConnection(url, user, password);
 
-            if(connection!=null){
-                System.out.println("Database OK");
-            }else{
-                System.out.println("DB FAILED");
+            if (connection != null) {
+                System.out.println("Database connection established.");
+            } else {
+                System.out.println("Failed to establish database connection.");
             }
-                        // Prompt user for input
-            Scanner scanner = new Scanner(System.in);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-            System.out.print("Enter user ID: ");
-            int userId = scanner.nextInt();
-
-            scanner.nextLine();
-
-            System.out.print("Enter log message: ");
-            String log = scanner.nextLine();
-
-            // Insert user data into the database
-            SqlCommands.insertUser(connection, userId, log);
-
-            System.out.println("User data inserted successfully.");
-
+    public void closeConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+                System.out.println("Database connection closed.");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
